@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import Random from '$lib/icons/Random.svelte';
 	import Clear from '$lib/icons/Clear.svelte';
 	import Pause from '$lib/icons/Pause.svelte';
 	import Play from '$lib/icons/Play.svelte';
-	import { fade } from 'svelte/transition';
+	import { toPng } from 'html-to-image';
+	import Download from '$lib/icons/Download.svelte';
 
 	interface Cell {
 		x: number;
@@ -16,6 +17,7 @@
 	let grid: Cell[][] = [];
 	let played: boolean = false;
 	let generation: number = 0;
+	let generate: boolean = false;
 
 	const shades = (color: string) => {
 		if (color === 'BLACK') {
@@ -37,13 +39,31 @@
 				row.push({
 					x: j,
 					y: i,
-					color: random() > 0.7 ? 'WHITE' : 'BLACK'
+					color: Math.random() > 0.7 ? 'WHITE' : 'BLACK'
 				});
 			}
 			grid = [...grid, row];
 		}
 
+		window.addEventListener('keydown', (e) => {
+			if (e.key === 'r') {
+				random();
+			}
+
+			if (e.key === 'c') {
+				clear();
+			}
+
+			if (e.key === 'p') {
+				played = !played;
+			}
+		});
+
 		gameManager();
+
+		onDestroy(() => {
+			window.removeEventListener('keydown', (e) => {});
+		});
 	});
 
 	const gameManager = async () => {
@@ -101,20 +121,47 @@
 		}
 		generation = 0;
 	};
+
+	const download = async (e) => {
+		generate = true;
+
+		/**
+		 * @type {HTMLElement | any}
+		 */
+		const node = document.querySelector('.game-of-life');
+		const dataUrl = await toPng(node, {
+			quality: 1
+		});
+
+		const a = document.createElement('a');
+		a.href = dataUrl;
+		a.download = `GameOfLife-${new Date().toLocaleDateString()}.png`;
+		a.click();
+
+		generate = false;
+	};
 </script>
 
-<section
-	style={'grid-template-columns: repeat(' + grid?.[0]?.length + ', 15px); --size: ' + size + 'px'}
->
+<section>
 	<p>Generation: {generation}</p>
-	{#each grid as row}
-		{#each row as cell}
-			<div
-				on:click={() => (cell.color = cell.color === 'BLACK' ? 'WHITE' : 'BLACK')}
-				style={`background-color: ${shades(cell.color)};`}
-			></div>
+
+	<button on:click={download} disabled={generate}>
+		<Download />
+	</button>
+
+	<div
+		class="game-of-life"
+		style={'grid-template-columns: repeat(' + grid?.[0]?.length + ', 15px); --size: ' + size + 'px'}
+	>
+		{#each grid as row}
+			{#each row as cell}
+				<div
+					on:click={() => (cell.color = cell.color === 'BLACK' ? 'WHITE' : 'BLACK')}
+					style={`background-color: ${shades(cell.color)};`}
+				></div>
+			{/each}
 		{/each}
-	{/each}
+	</div>
 </section>
 
 <div class="buttons">
@@ -135,18 +182,25 @@
 
 <style lang="scss">
 	section {
-		--size: 15px;
+		.game-of-life {
+			--size: 15px;
 
-		background-color: rgb(102, 102, 102);
-		display: grid;
-		grid-auto-rows: var(--size);
-		border-radius: 5px;
-		gap: 1px;
+			background-color: rgb(102, 102, 102);
+			display: grid;
+			grid-auto-rows: var(--size);
+			border-radius: 5px;
+			gap: 1px;
 
-		justify-content: center;
-		align-items: center;
-		margin: auto;
-		overflow: hidden;
+			justify-content: center;
+			align-items: center;
+			margin: auto;
+			overflow: hidden;
+
+			div {
+				width: var(--size);
+				height: var(--size);
+			}
+		}
 
 		p {
 			position: absolute;
@@ -155,13 +209,14 @@
 			padding: 10px;
 			color: var(--primary-950, white);
 		}
-
-		div {
-			width: var(--size);
-			height: var(--size);
+		button {
+			position: absolute;
+			top: 0;
+			right: 0;
+			padding: 10px;
+			margin: 16px;
 		}
 	}
-
 	.buttons {
 		position: fixed;
 		bottom: 0;
@@ -170,21 +225,22 @@
 		align-items: center;
 		gap: 10px;
 		margin-bottom: 20px;
-		button {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			padding: 10px;
-			border: none;
-			background-color: var(--primary-950);
-			color: white;
-			cursor: pointer;
-			border-radius: 5px;
-			animation: scale 0.3s;
+	}
 
-			&:active {
-				scale: 0.9;
-			}
+	button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 10px;
+		border: none;
+		background-color: var(--primary-950);
+		color: white;
+		cursor: pointer;
+		border-radius: 5px;
+		animation: scale 0.3s;
+
+		&:active {
+			scale: 0.9;
 		}
 	}
 </style>
