@@ -16,7 +16,7 @@
 	let played: boolean = false;
 
 	onMount(async () => {
-		let width: number = window.innerWidth - (window.innerWidth % 15) - 100;
+		let width: number = window.innerWidth - (window.innerWidth % 15) - 120;
 		const height: number = window.innerHeight - 200;
 
 		for (let i: number = 0; i < height; i += 15) {
