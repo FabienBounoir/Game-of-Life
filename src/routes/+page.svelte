@@ -4,6 +4,7 @@
 	import Clear from '$lib/icons/Clear.svelte';
 	import Pause from '$lib/icons/Pause.svelte';
 	import Play from '$lib/icons/Play.svelte';
+	import { fade } from 'svelte/transition';
 
 	interface Cell {
 		x: number;
@@ -11,13 +12,24 @@
 		color: 'BLACK' | 'WHITE';
 	}
 
+	const size: number = 15;
 	let grid: Cell[][] = [];
-	let size: number = 15;
 	let played: boolean = false;
+	let generation: number = 0;
+
+	const shades = (color: string) => {
+		if (color === 'BLACK') {
+			return 'var(--primary-950)';
+		} else {
+			return 'var(--primary-300)';
+		}
+	};
 
 	onMount(async () => {
 		let width: number = window.innerWidth - (window.innerWidth % 15) - 120;
 		const height: number = window.innerHeight - 200;
+
+		if (width < 900) width += 50;
 
 		for (let i: number = 0; i < height; i += 15) {
 			let row: Cell[] = [];
@@ -25,7 +37,7 @@
 				row.push({
 					x: j,
 					y: i,
-					color: 'BLACK'
+					color: random() > 0.7 ? 'WHITE' : 'BLACK'
 				});
 			}
 			grid = [...grid, row];
@@ -66,8 +78,9 @@
 				}
 
 				grid = newGrid;
+				generation++;
 			}
-			await new Promise<void>((r) => setTimeout(r, 120));
+			await new Promise<void>((r) => setTimeout(r, 100));
 		}
 	};
 
@@ -77,6 +90,7 @@
 				grid[i][j].color = 'BLACK';
 			}
 		}
+		generation = 0;
 	};
 
 	const random = () => {
@@ -85,22 +99,22 @@
 				grid[i][j].color = Math.random() > 0.7 ? 'WHITE' : 'BLACK';
 			}
 		}
+		generation = 0;
 	};
 </script>
 
 <section
 	style={'grid-template-columns: repeat(' + grid?.[0]?.length + ', 15px); --size: ' + size + 'px'}
 >
-	{#key grid}
-		{#each grid as row}
-			{#each row as cell}
-				<div
-					on:click={() => (cell.color = cell.color === 'BLACK' ? 'WHITE' : 'BLACK')}
-					style={`background-color: ${cell.color};`}
-				></div>
-			{/each}
+	<p>Generation: {generation}</p>
+	{#each grid as row}
+		{#each row as cell}
+			<div
+				on:click={() => (cell.color = cell.color === 'BLACK' ? 'WHITE' : 'BLACK')}
+				style={`background-color: ${shades(cell.color)};`}
+			></div>
 		{/each}
-	{/key}
+	{/each}
 </section>
 
 <div class="buttons">
@@ -134,6 +148,14 @@
 		margin: auto;
 		overflow: hidden;
 
+		p {
+			position: absolute;
+			top: 0;
+			left: 0;
+			padding: 10px;
+			color: var(--primary-950, white);
+		}
+
 		div {
 			width: var(--size);
 			height: var(--size);
@@ -154,7 +176,7 @@
 			align-items: center;
 			padding: 10px;
 			border: none;
-			background-color: #000000;
+			background-color: var(--primary-950);
 			color: white;
 			cursor: pointer;
 			border-radius: 5px;

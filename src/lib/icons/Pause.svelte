@@ -10,7 +10,7 @@
 		<g
 			id="Dribbble-Light-Preview"
 			transform="translate(-227.000000, -3765.000000)"
-			fill="var(--color-primary)"
+			fill="var(--primary-500)"
 		>
 			<g id="icons" transform="translate(56.000000, 160.000000)">
 				<path

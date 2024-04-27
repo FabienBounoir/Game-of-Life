@@ -7,7 +7,7 @@
 	height="20px"
 	viewBox="0 0 512 512"
 	xml:space="preserve"
-	fill="var(--color-primary)"
+	fill="var(--primary-500, white)"
 >
 	<g>
 		<path
