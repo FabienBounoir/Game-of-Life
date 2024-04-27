@@ -1,18 +1,8 @@
-# create-svelte
+# Game of life
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Dive into a pixelated universe where shapes emerge, dance, and vanish according to simple rules. That's Conway's Game of Life! Direct this mesmerizing ballet of life and death with just a few rules, crafting a hypnotic spectacle of complexity from nothing but pixels
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+<img src="/static/banner.png" alt="Game of life render" />
 
 ## Developing
 
